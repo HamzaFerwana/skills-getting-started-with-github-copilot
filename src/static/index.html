@@ -15,6 +15,23 @@
     <main>
       <section id="activities-container">
         <h3>Available Activities</h3>
+
+        <!-- Template for activity cards -->
+        <template id="activity-template">
+          <div class="activity-card">
+            <h4 class="activity-title">Activity Name</h4>
+            <p class="activity-desc">Description</p>
+            <p class="activity-schedule"><strong>Schedule:</strong> --</p>
+            <p class="activity-capacity"><strong>Capacity:</strong> 0 / 0</p>
+
+            <div class="participants">
+              <h5>Participants</h5>
+              <div class="participant-empty">No participants yet.</div>
+              <ul class="participants-list" aria-live="polite"></ul>
+            </div>
+          </div>
+        </template>
+
         <div id="activities-list">
           <!-- Activities will be loaded here -->
           <p>Loading activities...</p>

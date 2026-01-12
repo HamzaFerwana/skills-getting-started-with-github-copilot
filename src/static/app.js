@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById('signup-form');
   const messageEl = document.getElementById('message');
 
+  const activityTemplate = document.getElementById('activity-template');
+
   // Function to fetch activities from API
   async function fetchActivities() {
     activitiesListEl.innerHTML = '<p>Loading activities...</p>';
@@ -22,52 +24,92 @@ document.addEventListener("DOMContentLoaded", () => {
     activitiesListEl.innerHTML = '';
     Object.keys(activities).forEach(name => {
       const data = activities[name];
-      const card = document.createElement('div');
-      card.className = 'activity-card';
 
-      const title = document.createElement('h4');
-      title.textContent = name;
-      card.appendChild(title);
+      // Use template if available
+      let card;
+      if (activityTemplate && activityTemplate.content) {
+        const clone = activityTemplate.content.cloneNode(true);
+        card = clone.querySelector('.activity-card');
 
-      const desc = document.createElement('p');
-      desc.textContent = data.description;
-      card.appendChild(desc);
+        // populate fields
+        const titleEl = clone.querySelector('.activity-title');
+        if (titleEl) titleEl.textContent = name;
 
-      const schedule = document.createElement('p');
-      schedule.innerHTML = `<strong>Schedule:</strong> ${data.schedule}`;
-      card.appendChild(schedule);
+        const descEl = clone.querySelector('.activity-desc');
+        if (descEl) descEl.textContent = data.description;
 
-      const capacity = document.createElement('p');
-      capacity.innerHTML = `<strong>Capacity:</strong> ${data.participants.length} / ${data.max_participants}`;
-      card.appendChild(capacity);
+        const scheduleEl = clone.querySelector('.activity-schedule');
+        if (scheduleEl) scheduleEl.innerHTML = `<strong>Schedule:</strong> ${data.schedule}`;
 
-      // Participants section
-      const participantsWrap = document.createElement('div');
-      participantsWrap.className = 'participants';
-      const participantsTitle = document.createElement('h5');
-      participantsTitle.textContent = 'Participants';
-      participantsWrap.appendChild(participantsTitle);
+        const capacityEl = clone.querySelector('.activity-capacity');
+        if (capacityEl) capacityEl.innerHTML = `<strong>Capacity:</strong> ${data.participants.length} / ${data.max_participants}`;
 
-      const ul = document.createElement('ul');
-      ul.className = 'participants-list';
+        const ul = clone.querySelector('.participants-list');
+        const emptyEl = clone.querySelector('.participant-empty');
 
-      if (Array.isArray(data.participants) && data.participants.length > 0) {
-        data.participants.forEach(email => {
-          const li = document.createElement('li');
-          li.textContent = email;
-          ul.appendChild(li);
-        });
+        if (Array.isArray(data.participants) && data.participants.length > 0) {
+          // remove empty message and append participants
+          if (emptyEl) emptyEl.remove();
+          data.participants.forEach(email => {
+            const li = document.createElement('li');
+            li.textContent = email;
+            ul.appendChild(li);
+          });
+        } else {
+          // ensure the list is hidden if empty
+          if (ul) ul.remove();
+        }
+
+        activitiesListEl.appendChild(clone);
       } else {
-        const empty = document.createElement('div');
-        empty.className = 'participant-empty';
-        empty.textContent = 'No participants yet.';
-        participantsWrap.appendChild(empty);
+        // fallback to previous manual DOM creation (unchanged)
+        const card = document.createElement('div');
+        card.className = 'activity-card';
+
+        const title = document.createElement('h4');
+        title.textContent = name;
+        card.appendChild(title);
+
+        const desc = document.createElement('p');
+        desc.textContent = data.description;
+        card.appendChild(desc);
+
+        const schedule = document.createElement('p');
+        schedule.innerHTML = `<strong>Schedule:</strong> ${data.schedule}`;
+        card.appendChild(schedule);
+
+        const capacity = document.createElement('p');
+        capacity.innerHTML = `<strong>Capacity:</strong> ${data.participants.length} / ${data.max_participants}`;
+        card.appendChild(capacity);
+
+        // Participants section
+        const participantsWrap = document.createElement('div');
+        participantsWrap.className = 'participants';
+        const participantsTitle = document.createElement('h5');
+        participantsTitle.textContent = 'Participants';
+        participantsWrap.appendChild(participantsTitle);
+
+        const ul = document.createElement('ul');
+        ul.className = 'participants-list';
+
+        if (Array.isArray(data.participants) && data.participants.length > 0) {
+          data.participants.forEach(email => {
+            const li = document.createElement('li');
+            li.textContent = email;
+            ul.appendChild(li);
+          });
+        } else {
+          const empty = document.createElement('div');
+          empty.className = 'participant-empty';
+          empty.textContent = 'No participants yet.';
+          participantsWrap.appendChild(empty);
+        }
+
+        if (ul.children.length) participantsWrap.appendChild(ul);
+        card.appendChild(participantsWrap);
+
+        activitiesListEl.appendChild(card);
       }
-
-      if (ul.children.length) participantsWrap.appendChild(ul);
-      card.appendChild(participantsWrap);
-
-      activitiesListEl.appendChild(card);
     });
   }
 
